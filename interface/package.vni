@@ -2,7 +2,5 @@ package automy.basic_cuda;
 
 extern CUDA_Image8 = {22, 3, 1};			// {IMAGE, 3D, UINT8}
 extern CUDA_Image16 = {22, 3, 2};			// {IMAGE, 3D, UINT16}
-extern CUDA_Image32 = {22, 3, 3};			// {IMAGE, 3D, UINT32}
 extern CUDA_ImageF16 = {22, 3, 2};			// {IMAGE, 3D, UINT16}
 extern CUDA_ImageF32 = {22, 3, 9};			// {IMAGE, 3D, FLOAT}
-extern CUDA_ImageF64 = {22, 3, 10};			// {IMAGE, 3D, DOUBLE}

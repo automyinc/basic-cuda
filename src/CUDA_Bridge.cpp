@@ -8,9 +8,11 @@
 #include <automy/basic_cuda/CUDA_Bridge.h>
 #include <automy/basic_cuda/CUDA_ImageFrame8.hxx>
 #include <automy/basic_cuda/CUDA_ImageFrame16.hxx>
+#include <automy/basic_cuda/CUDA_ImageFrameF16.hxx>
 #include <automy/basic_cuda/CUDA_ImageFrameF32.hxx>
 #include <automy/basic/ImageFrame8.hxx>
 #include <automy/basic/ImageFrame16.hxx>
+#include <automy/basic/ImageFrameF16.hxx>
 #include <automy/basic/ImageFrameF32.hxx>
 #include <automy/basic/MultiImageFrame.hxx>
 #include <automy/math/math.h>
@@ -25,10 +27,10 @@ namespace basic_cuda {
 CUDA_Bridge::CUDA_Bridge(const std::string& _vnx_name) : CUDA_BridgeBase(_vnx_name) {}
 
 void CUDA_Bridge::main() {
-	for(const std::string& topic : upload) {
+	for(const auto& topic : upload) {
 		subscribe(cpu_domain + "." + topic);
 	}
-	for(const std::string& topic : download) {
+	for(const auto& topic : download) {
 		subscribe(cuda_domain + "." + topic);
 	}
 	set_timer_millis(interval_ms, std::bind(&CUDA_Bridge::update, this));
@@ -42,8 +44,8 @@ void CUDA_Bridge::main() {
 	Super::main();
 }
 
-void CUDA_Bridge::handle(std::shared_ptr<const basic::ImageFrame> value, std::shared_ptr<const vnx::Sample> sample) {
-	const std::string topic_name = sample->topic->get_name();
+void CUDA_Bridge::handle(std::shared_ptr<const basic::ImageFrame> value) {
+	const std::string topic_name = vnx_sample->topic->get_name();
 	
 	if(topic_name.substr(0, cpu_domain.size()) == cpu_domain) {
 		
@@ -78,7 +80,7 @@ std::shared_ptr<basic::ImageFrame> CUDA_Bridge::upload_frame(std::shared_ptr<con
 		if(input) {
 			const size_t size = input->image.get_size() * 2;
 			std::shared_ptr<CUDA_ImageFrame16> out = buffers[size].get<CUDA_ImageFrame16>();
-			out->num_bits = input->num_bits;
+//			out->num_bits = input->num_bits;
 			out->image = input->image;
 			num_upload_bytes += size;
 			return out;
@@ -107,7 +109,7 @@ std::shared_ptr<basic::ImageFrame> CUDA_Bridge::upload_frame(std::shared_ptr<con
 	{
 		std::shared_ptr<const basic::MultiImageFrame> input = std::dynamic_pointer_cast<const basic::MultiImageFrame>(value);
 		if(input) {
-			std::shared_ptr<basic::MultiImageFrame> out = MultiImageFrame::create();
+			std::shared_ptr<basic::MultiImageFrame> out = basic::MultiImageFrame::create();
 			for(std::shared_ptr<const basic::ImageFrame> input_layer : input->frames) {
 				std::shared_ptr<basic::ImageFrame> layer = upload_frame(input_layer);
 				if(layer) {
@@ -122,7 +124,7 @@ std::shared_ptr<basic::ImageFrame> CUDA_Bridge::upload_frame(std::shared_ptr<con
 	return 0;
 }
 
-std::shared_ptr<ImageFrame> CUDA_Bridge::download_frame(std::shared_ptr<const ImageFrame> value) {
+std::shared_ptr<basic::ImageFrame> CUDA_Bridge::download_frame(std::shared_ptr<const basic::ImageFrame> value) {
 	{
 		std::shared_ptr<const CUDA_ImageFrame8> input = std::dynamic_pointer_cast<const CUDA_ImageFrame8>(value);
 		if(input) {
@@ -138,7 +140,7 @@ std::shared_ptr<ImageFrame> CUDA_Bridge::download_frame(std::shared_ptr<const Im
 		if(input) {
 			const size_t size = input->image.get_size() * 2;
 			std::shared_ptr<basic::ImageFrame16> out = buffers[size].get<basic::ImageFrame16>();
-			out->num_bits = input->num_bits;
+//			out->num_bits = input->num_bits;
 			input->image.download(out->image);
 			num_download_bytes += size;
 			return out;
@@ -167,7 +169,7 @@ std::shared_ptr<ImageFrame> CUDA_Bridge::download_frame(std::shared_ptr<const Im
 	{
 		std::shared_ptr<const basic::MultiImageFrame> input = std::dynamic_pointer_cast<const basic::MultiImageFrame>(value);
 		if(input) {
-			std::shared_ptr<basic::MultiImageFrame> out = MultiImageFrame::create();
+			std::shared_ptr<basic::MultiImageFrame> out = basic::MultiImageFrame::create();
 			for(std::shared_ptr<const basic::ImageFrame> input_layer : input->frames) {
 				std::shared_ptr<basic::ImageFrame> layer = download_frame(input_layer);
 				if(layer) {
@@ -182,15 +184,15 @@ std::shared_ptr<ImageFrame> CUDA_Bridge::download_frame(std::shared_ptr<const Im
 	return 0;
 }
 
-//void CUDA_Bridge::handle(std::shared_ptr<const PointCloud> value, std::shared_ptr<const vnx::Sample> sample) {
-//	const std::string topic_name = sample->topic->get_name();
+//void CUDA_Bridge::handle(std::shared_ptr<const PointCloud> value) {
+//	const std::string topic_name = vnx_sample->topic->get_name();
 //	if(topic_name.substr(0, cpu_domain.size()) == cpu_domain) {
 //		// TODO
 //	}
 //}
 
-//void CUDA_Bridge::handle(std::shared_ptr<const CUDA_PointCloud> value, std::shared_ptr<const vnx::Sample> sample) {
-//	const std::string topic_name = sample->topic->get_name();
+//void CUDA_Bridge::handle(std::shared_ptr<const CUDA_PointCloud> value) {
+//	const std::string topic_name = vnx_sample->topic->get_name();
 //	if(topic_name.substr(0, cuda_domain.size()) == cuda_domain) {
 //		std::shared_ptr<PointCloud> out = PointCloud::create();
 //		out->time = value->time;
@@ -221,7 +223,7 @@ std::shared_ptr<ImageFrame> CUDA_Bridge::download_frame(std::shared_ptr<const Im
 
 void CUDA_Bridge::update() {
 	std::set<std::string> upload_topic_set;
-	for(const std::string& topic : upload) {
+	for(const auto& topic : upload) {
 		upload_topic_set.insert(cpu_domain + "." + topic);
 	}
 	

@@ -7,8 +7,8 @@ module CUDA_Bridge {
 	string cpu_domain;
 	string cuda_domain;
 	
-	vector<vnx.TopicPtr> upload;
-	vector<vnx.TopicPtr> download;
+	vector<string> upload;
+	vector<string> download;
 	
 	int interval_ms = 100;
 	

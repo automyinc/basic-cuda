@@ -3,15 +3,7 @@ project(automy-basic-cuda)
 
 find_package(CUDA REQUIRED)
 
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} $ENV{CUDA_NVCC_FLAGS} -lineinfo --default-stream per-thread --disable-warnings")
-
 file(GLOB GENERATED_SOURCE_FILES generated/src/*.cpp)
-
-include_directories(
-	BEFORE
-	include
-	generated/include
-)
 
 add_library(automy_basic_cuda SHARED
 	${GENERATED_SOURCE_FILES}

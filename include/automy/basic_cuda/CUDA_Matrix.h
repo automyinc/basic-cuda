@@ -49,8 +49,8 @@ public:
 		cuda_check(cudaMemset(data, 0, size() * sizeof(T)), "cudaMemset(): ");
 	}
 	
-	void set_zero_async() {
-		cuda_check(cudaMemsetAsync(data, 0, size() * sizeof(T)), "cudaMemsetAsync(): ");
+	void set_zero_async(cudaStream_t stream = 0) {
+		cuda_check(cudaMemsetAsync(data, 0, size() * sizeof(T), stream), "cudaMemsetAsync(): ");
 	}
 	
 	CUDA_Matrix& operator=(const CUDA_Matrix& mat) {

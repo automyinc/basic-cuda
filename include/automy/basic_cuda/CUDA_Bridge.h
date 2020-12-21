@@ -22,11 +22,11 @@ public:
 protected:
 	void main() override;
 	
-	void handle(std::shared_ptr<const basic::ImageFrame> value, std::shared_ptr<const vnx::Sample> sample) override;
+	void handle(std::shared_ptr<const basic::ImageFrame> value) override;
 	
-//	void handle(std::shared_ptr<const PointCloud> value, std::shared_ptr<const vnx::Sample> sample) override;
+//	void handle(std::shared_ptr<const PointCloud> value) override;
 	
-//	void handle(std::shared_ptr<const CUDA_PointCloud> value, std::shared_ptr<const vnx::Sample> sample) override;
+//	void handle(std::shared_ptr<const CUDA_PointCloud> value) override;
 	
 	std::shared_ptr<basic::ImageFrame> upload_frame(std::shared_ptr<const basic::ImageFrame> value);
 	
