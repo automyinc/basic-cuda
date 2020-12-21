@@ -1,0 +1,7 @@
+package automy.basic_cuda;
+
+class CUDA_ImageFrame8 extends automy.basic.ImageFrame {
+	
+	CUDA_Image8 image;
+	
+}

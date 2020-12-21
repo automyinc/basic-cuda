@@ -1,0 +1,20 @@
+package automy.basic_cuda;
+
+module CUDA_Bridge {
+	
+	int device = -1;
+	
+	string cpu_domain;
+	string cuda_domain;
+	
+	vector<vnx.TopicPtr> upload;
+	vector<vnx.TopicPtr> download;
+	
+	int interval_ms = 100;
+	
+	bool auto_download = false;
+	
+	
+	void handle(automy.basic.ImageFrame sample);
+	
+}

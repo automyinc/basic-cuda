@@ -1,0 +1,9 @@
+package automy.basic_cuda;
+
+class CUDA_ImageFrame16 extends automy.basic.ImageFrame {
+	
+	int num_bits;		// 0 to 16
+	
+	CUDA_Image16 image;
+	
+}
