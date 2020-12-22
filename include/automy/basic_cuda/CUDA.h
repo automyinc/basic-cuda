@@ -404,6 +404,24 @@ inline uint char4_as_uint(const char4& v) {
 	return *((const uint*)&v);
 }
 
+template<typename T>
+__device__ inline T fetch_xy(int x, int y, const T* data, const int width)
+{
+	return data[y * width + x];
+}
+
+template<typename T>
+__device__ inline T fetch_zxy(int x, int y, int z, const T* data, const int width, const int depth)
+{
+	return data[(y * width + x) * depth + z];
+}
+
+template<typename T>
+__device__ inline T fetch_xyz(int x, int y, int z, const T* data, const int width, const int height)
+{
+	return data[(z * height + y) * width + x];
+}
+
 
 inline void cuda_check(const cudaError_t& code) {
 	if(code != cudaSuccess) {
