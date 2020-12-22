@@ -33,10 +33,7 @@ public:
 	}
 	
 	~CUDA_Image() {
-		if(data_) {
-			cudaFree(data_);
-		}
-		data_ = 0;
+		clear();
 	}
 	
 	CUDA_Image& operator=(const CUDA_Image& image) {
@@ -101,7 +98,7 @@ public:
 		if(data_) {
 			cudaFree(data_);
 		}
-		data_ = 0;
+		data_ = nullptr;
 	}
 	
 	void set_zero() {
@@ -137,7 +134,7 @@ public:
 	}
 	
 private:
-	T* data_ = 0;
+	T* data_ = nullptr;
 	uint32_t width_ = 0;
 	uint32_t height_ = 0;
 	uint32_t depth_ = 0;

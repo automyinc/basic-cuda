@@ -123,7 +123,7 @@ public:
 	}
 
 private:
-	T* data_ = 0;
+	T* data_ = nullptr;
 	size_t depth_ = 1;
 	
 };
