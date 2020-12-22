@@ -407,19 +407,19 @@ inline uint char4_as_uint(const char4& v) {
 template<typename T>
 __device__ inline T fetch_xy(int x, int y, const T* data, const int width)
 {
-	return data[y * width + x];
+	return __ldg(&data[y * width + x]);
 }
 
 template<typename T>
 __device__ inline T fetch_zxy(int x, int y, int z, const T* data, const int width, const int depth)
 {
-	return data[(y * width + x) * depth + z];
+	return __ldg(&data[(y * width + x) * depth + z]);
 }
 
 template<typename T>
 __device__ inline T fetch_xyz(int x, int y, int z, const T* data, const int width, const int height)
 {
-	return data[(z * height + y) * width + x];
+	return __ldg(&data[(z * height + y) * width + x]);
 }
 
 
