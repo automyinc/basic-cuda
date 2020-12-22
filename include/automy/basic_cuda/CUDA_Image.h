@@ -33,15 +33,15 @@ public:
 	}
 	
 	~CUDA_Image() {
-		if(data) {
-			cudaFree(data);
+		if(data_) {
+			cudaFree(data_);
 		}
-		data = 0;
+		data_ = 0;
 	}
 	
 	CUDA_Image& operator=(const CUDA_Image& image) {
 		resize(image.width(), image.height(), image.depth());
-		cuda_check(cudaMemcpy(data, image.get_data(), get_size() * sizeof(T), cudaMemcpyDeviceToDevice), "cudaMemcpy() :");
+		cuda_check(cudaMemcpy(data_, image.data(), size() * sizeof(T), cudaMemcpyDeviceToDevice), "cudaMemcpy() :");
 		return *this;
 	}
 	
@@ -62,25 +62,29 @@ public:
 		return depth_;
 	}
 	
-	size_t get_size() const {
+	size_t size() const {
 		return size_t(width_) * size_t(height_) * size_t(depth_);
 	}
 	
-	T* get_data() {
-		return data;
+	size_t get_size() const {
+		return size();
 	}
-	
-	const T* get_data() const {
-		return data;
+
+	T* data() {
+		return data_;
+	}
+
+	const T* data() const {
+		return data_;
 	}
 	
 	void resize(size_t new_width, size_t new_height, size_t new_depth = 1) {
 		const size_t new_size = new_width * new_height * new_depth;
-		if(new_size != get_size()) {
-			if(data) {
-				cudaFree(data);
+		if(new_size != size()) {
+			if(data_) {
+				cudaFree(data_);
 			}
-			cuda_check(cudaMalloc((void**)&data, new_size * sizeof(T)), "cudaMallocManaged(): ");
+			cuda_check(cudaMalloc((void**)&data_, new_size * sizeof(T)), "cudaMallocManaged(): ");
 		}
 		width_ = new_width;
 		height_ = new_height;
@@ -91,46 +95,46 @@ public:
 		width_ = 0;
 		height_ = 0;
 		depth_ = 0;
-		if(data) {
-			cudaFree(data);
+		if(data_) {
+			cudaFree(data_);
 		}
-		data = 0;
+		data_ = 0;
 	}
 	
 	void set_zero() {
-		cuda_check(cudaMemset(data, 0, get_size() * sizeof(T)), "cudaMemset(): ");
+		cuda_check(cudaMemset(data_, 0, size() * sizeof(T)), "cudaMemset(): ");
 	}
 	
 	void set_zero_async(cudaStream_t stream = 0) {
-		cuda_check(cudaMemsetAsync(data, 0, get_size() * sizeof(T), stream), "cudaMemsetAsync(): ");
+		cuda_check(cudaMemsetAsync(data_, 0, size() * sizeof(T), stream), "cudaMemsetAsync(): ");
 	}
 	
 	void copy_from_async(const CUDA_Image& image, cudaStream_t stream = 0) {
 		resize(image.width(), image.height(), image.depth());
-		cuda_check(cudaMemcpyAsync(data, image.get_data(), get_size() * sizeof(T), cudaMemcpyDeviceToDevice, stream), "cudaMemcpyAsync() :");
+		cuda_check(cudaMemcpyAsync(data_, image.data(), size() * sizeof(T), cudaMemcpyDeviceToDevice, stream), "cudaMemcpyAsync() :");
 	}
 	
 	void upload(const basic::Image<T>& image) {
 		resize(image.width(), image.height(), image.depth());
-		cuda_check(cudaMemcpy(data, image.get_data(), get_size() * sizeof(T), cudaMemcpyHostToDevice), "cudaMemcpy() :");
+		cuda_check(cudaMemcpy(data_, image.get_data(), size() * sizeof(T), cudaMemcpyHostToDevice), "cudaMemcpy() :");
 	}
 	
 	void upload_async(const basic::Image<T>& image, cudaStream_t stream = 0) {
 		resize(image.width(), image.height(), image.depth());
-		cuda_check(cudaMemcpyAsync(data, image.get_data(), get_size() * sizeof(T), cudaMemcpyHostToDevice, stream), "cudaMemcpyAsync() :");
+		cuda_check(cudaMemcpyAsync(data_, image.get_data(), size() * sizeof(T), cudaMemcpyHostToDevice, stream), "cudaMemcpyAsync() :");
 	}
 	
 	void download(basic::Image<T>& image) const {
 		image.resize(width_, height_, depth_);
-		cuda_check(cudaMemcpy(image.get_data(), data, get_size() * sizeof(T), cudaMemcpyDeviceToHost), "cudaMemcpy() :");
+		cuda_check(cudaMemcpy(image.get_data(), data_, size() * sizeof(T), cudaMemcpyDeviceToHost), "cudaMemcpy() :");
 	}
 	
 	void prefetch(int device, cudaStream_t stream = 0) const {
-		cuda_check(cudaMemPrefetchAsync(data, get_size() * sizeof(T), device, stream), "cudaMemPrefetchAsync(): ");
+		cuda_check(cudaMemPrefetchAsync(data_, size() * sizeof(T), device, stream), "cudaMemPrefetchAsync(): ");
 	}
 	
 private:
-	T* data = 0;
+	T* data_ = 0;
 	uint32_t width_ = 0;
 	uint32_t height_ = 0;
 	uint32_t depth_ = 0;
