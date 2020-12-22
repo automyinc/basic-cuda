@@ -83,8 +83,11 @@ public:
 		if(new_size != size()) {
 			if(data_) {
 				cudaFree(data_);
+				data_ = nullptr;
 			}
-			cuda_check(cudaMalloc((void**)&data_, new_size * sizeof(T)), "cudaMallocManaged(): ");
+			if(new_size) {
+				cuda_check(cudaMalloc((void**)&data_, new_size * sizeof(T)), "cudaMallocManaged(): ");
+			}
 		}
 		width_ = new_width;
 		height_ = new_height;
