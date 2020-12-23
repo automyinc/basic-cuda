@@ -81,5 +81,13 @@ __device__ inline T fetch_xy(float x, float y, cudaTextureObject_t texture, cons
 	return tex2D<T>(texture, (x + 0.5f) * inv_width, (y + 0.5f) * inv_height);
 }
 
+template<typename T>
+__device__ inline void warp_sum_32(T& value)
+{
+	for(int k = 16; k >= 1; k /= 2) {
+		value += __shfl_xor_sync(0xffffffff, value, k, 32);
+	}
+}
+
 
 #endif /* INCLUDE_BASIC_CUDA_DEVICE_H_ */
