@@ -22,10 +22,8 @@ public:
 	
 	CUDA_Matrix() : CUDA_Matrix(1) {}
 
-	CUDA_Matrix(size_t depth_)
-		:	depth_(depth_)
-	{
-		cuda_check(cudaMalloc(&data_, size() * sizeof(T)));
+	CUDA_Matrix(size_t depth) {
+		resize(depth);
 	}
 	
 	CUDA_Matrix(const CUDA_Matrix& mat) : CUDA_Matrix() {
@@ -38,9 +36,27 @@ public:
 	}
 	
 	~CUDA_Matrix() {
-		cuda_check(cudaFree(data_));
+		clear();
 	}
 	
+	void resize(size_t depth) {
+		if(depth != depth_) {
+			clear();
+			depth_ = depth;
+			if(depth) {
+				cuda_check(cudaMalloc((void**)&data_, size() * sizeof(T)));
+			}
+		}
+	}
+
+	void clear() {
+		if(data_) {
+			cuda_check(cudaFree(data_));
+			data_ = nullptr;
+			depth_ = 0;
+		}
+	}
+
 	size_t size() const {
 		return Rows * Cols * depth_;
 	}
@@ -98,12 +114,16 @@ public:
 	}
 	
 	template<typename S>
-	void upload_async(const std::vector<math::Matrix<S, Rows, Cols>>& mats, cudaStream_t stream = 0) {
-		if(mats.size() != depth_) {
-			throw std::logic_error("size mismatch");
-		}
+	void upload_async(const std::vector<S>& mats, cudaStream_t stream = 0) {
 		const std::vector<math::Matrix<T, Rows, Cols>> tmp(mats.begin(), mats.end());
-		cuda_check(cudaMemcpyAsync(data_, tmp[0].get_data(), size() * sizeof(T), cudaMemcpyHostToDevice, stream), "cudaMemcpyAsync(): ");
+		upload_async(tmp, stream);
+	}
+
+	void upload_async(const std::vector<math::Matrix<T, Rows, Cols>>& mats, cudaStream_t stream = 0) {
+		if(mats.size() != depth_) {
+			throw std::logic_error("depth mismatch");
+		}
+		cuda_check(cudaMemcpyAsync(data_, mats[0].get_data(), size() * sizeof(T), cudaMemcpyHostToDevice, stream), "cudaMemcpyAsync(): ");
 	}
 
 	math::Matrix<T, Rows, Cols> download() const {
@@ -124,7 +144,7 @@ public:
 
 private:
 	T* data_ = nullptr;
-	size_t depth_ = 1;
+	size_t depth_ = 0;
 	
 };
 
