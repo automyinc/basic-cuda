@@ -353,7 +353,7 @@ __device__ __host__ inline void inverse_33(T* A_inv, const T* A) {
 	const T det = 	A[0 + 0 * 3] * (A[1 + 1 * 3] * A[2 + 2 * 3] - A[2 + 1 * 3] * A[1 + 2 * 3]) -
 					A[0 + 1 * 3] * (A[1 + 0 * 3] * A[2 + 2 * 3] - A[1 + 2 * 3] * A[2 + 0 * 3]) +
 					A[0 + 2 * 3] * (A[1 + 0 * 3] * A[2 + 1 * 3] - A[1 + 1 * 3] * A[2 + 0 * 3]);
-	const T inv_det = 1.f / det;
+	const T inv_det = T(1) / det;
 	A_inv[0 + 0 * 3] = (A[1 + 1 * 3] * A[2 + 2 * 3] - A[2 + 1 * 3] * A[1 + 2 * 3]) * inv_det;
 	A_inv[0 + 1 * 3] = (A[0 + 2 * 3] * A[2 + 1 * 3] - A[0 + 1 * 3] * A[2 + 2 * 3]) * inv_det;
 	A_inv[0 + 2 * 3] = (A[0 + 1 * 3] * A[1 + 2 * 3] - A[0 + 2 * 3] * A[1 + 1 * 3]) * inv_det;
