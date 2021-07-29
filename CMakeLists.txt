@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 project(automy-basic-cuda)
+add_compile_options(-DNOGDI)
 
 find_package(CUDA REQUIRED)
 
